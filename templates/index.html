@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Jokes</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.0/css/bootstrap.min.css">
+    <style>
+        .joke-table {
+            margin-bottom: 20px;
+        }
+
+        .punchline-row {
+            display: none;
+        }
+    </style>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        $(document).ready(function() {
+            $('#get-joke-btn').click(function() {
+                getJoke();
+            });
+
+            function getJoke() {
+                $.ajax({
+                    url: "/joke",
+                    type: "POST",
+                    success: function(response) {
+                        var jokeElement = '<table class="table joke-table"><tr><td>Q:</td><td>' + response.setup + '</td></tr><tr class="punchline-row"><td>A:</td><td>' + response.punchline + '</td></tr><tr><td></td><td><button class="btn btn-primary reveal-btn">Reveal Punchline</button></td></tr></table>';
+                        $('#jokes-container').prepend(jokeElement);
+                    }
+                });
+            }
+
+            $('#jokes-container').on('click', '.reveal-btn', function() {
+                $(this).closest('.joke-table').find('.punchline-row').show();
+                $(this).closest('tr').remove();
+            });
+        });
+    </script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="mt-5">Jokes:</h1>
+        <button id="get-joke-btn" class="btn btn-primary mt-3 mb-3">Get Another Joke</button>
+        <div id="jokes-container">
+            {% for joke in jokes %}
+                <table class="table joke-table">
+                    <tr>
+                        <td>Q:</td>
+                        <td>{{ joke.setup }}</td>
+                    </tr>
+                    {% if joke.revealed %}
+                        <tr class="punchline-row">
+                            <td>A:</td>
+                            <td>{{ joke.punchline }}</td>
+                        </tr>
+                    {% else %}
+                        <tr class="punchline-row" style="display: none;">
+                            <td>A:</td>
+                            <td>{{ joke.punchline }}</td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td><button class="btn btn-primary reveal-btn">Reveal Punchline</button></td>
+                        </tr>
+                    {% endif %}
+                </table>
+            {% endfor %}
+        </div>
+    </div>
+</body>
+</html>
